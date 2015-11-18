@@ -147,7 +147,7 @@ class PicThumb{ // class start
         $colorspace = (!isset($source_info['channels']) || $source_info['channels']!=3)? ' -colorspace RGB ' : '';
 
         // 命令行
-        $cmd = sprintf("convert -resize '%sx%s' \"%s\" %s -quality %s %s \"%s\"", $this->_width, $this->_height, $this->_source, $bgcolor, $this->_quality, $colorspace, $this->_dest);
+        $cmd = sprintf("convert -resize '%sx%s' '%s' %s -quality %s %s '%s'", $this->_width, $this->_height, $this->_source, $bgcolor, $this->_quality, $colorspace, $this->_dest);
 
         // 记录执行的命令
         $this->to_log($cmd);

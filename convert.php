@@ -14,6 +14,10 @@
     } 
 
     function convert_image($filepath = '.',$lastmod) {
+        if(strrpos($filepath,"'")!== false){
+            rename($filepath,str_replace("'","",$filepath));
+            $filepath = str_replace("'","",$filepath);
+        }
         $crc = str_replace(ORIGIN_PATH,CRC_PATH,$filepath);
         //$checksum = file_crc($filepath);
         if(file_exists($crc)){
@@ -62,8 +66,9 @@
             } else {    //如果是文件,直接输出
                 //insert($stmt,$path,$file);
                 $ext=pathinfo($file, PATHINFO_EXTENSION);
-                //fwrite($myfile, '"' . $path . '","' . $file . "\",\"" . date ("Y/m/d H:i:s", filemtime($sub_dir)) . '","' . filesize($sub_dir) . "\"\n");
-                if($ext=="jpg" || $ext=="png" || $ext=="gif" || $ext=="bmp"){
+                $filesize = filesize($sub_dir);
+                //fwrite($myfile, '"' . $path . '","' . $file . "\",\"" . date ("Y/m/d H:i:s", filemtime($sub_dir)) . '","' . $filesize . "\"\n");
+                if(($ext=="jpg" || $ext=="png" || $ext=="gif" || $ext=="bmp") && $filesize > 0 ){
                     convert_image($sub_dir,filemtime($sub_dir));
                 }
             }
