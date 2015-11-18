@@ -58,6 +58,12 @@
                 traverse($sub_dir,$myfile);
             } else {    //如果是文件,直接输出
                 //insert($stmt,$path,$file);
+                if(strrpos($file,"'")!== false){
+                    $old_sub_dir=$sub_dir;
+                    $file = str_replace("'","",$file);
+                    $sub_dir = $path . DIRECTORY_SEPARATOR . $file;
+                    rename($old_sub_dir,$sub_dir);
+                }
                 $ext=pathinfo($file, PATHINFO_EXTENSION);
                 fwrite($myfile, '"' . $path . '","' . $file . "\",\"" . date ("Y/m/d H:i:s", filemtime($sub_dir)) . '","' . filesize($sub_dir) . "\"\n");
                 //if($ext=="jpg" || $ext=="png" || $ext=="gif" || $ext=="bmp"){

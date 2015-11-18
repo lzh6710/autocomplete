@@ -1,3 +1,13 @@
+<?php
+$searchkey="";
+$hasKeyWord=false;
+if (isset($_GET['term'])){
+    $searchkey=trim($_GET['term']);
+    if(!empty($searchkey)){
+        $hasKeyWord=true;
+    }
+}
+?>
 <!doctype html>
 <html lang="en">
 <head>
@@ -41,7 +51,7 @@
                 },
                 response: function( event, ui ) {alert(ui.content.length)}
           });
-          $(".auto").keyup(function(){
+          var searchFunc = function(){
               keyvalue = $(".auto").val();
               if (oldkeyvalue==keyvalue) return;
               data={ term: keyvalue };
@@ -52,15 +62,40 @@
                   success: function(data){
                       innerhtml="";
                       for(var i=0;i<data.length;i++){
-                          ext = GetExtensionFileName(data[i].filename);
+                          ext = GetExtensionFileName(data[i].filename).toLowerCase();
                           innerhtml+="<div class='grid-item'>";
                           innerhtml+="<div>";
                           //innerhtml+="<a href='" + data[i].path.replace("/home/nfs/order-sys-share-data","file:///Z:") + "/" + data[i].filename + "' target='_new'>";
-                          innerhtml+="<a href='" + data[i].path.replace("/home/nfs/order-sys-share-data","originPic") + "/" + data[i].filename + "' target='_new'>";
+                          target="";
+                          if(ext == "jpg" || ext == "png" || ext == "gif") {
+                              //target=" target='_new'";
+                          } 
+                          innerhtml+="<a href='" + data[i].path.replace("/home/nfs/order-sys-share-data","originPic") + "/" + data[i].filename + "' download "+ target +">";
                           if(ext == "jpg" || ext == "png" || ext == "gif") {
                               innerhtml+="<img width=150 src='" + data[i].path.replace("/home/nfs/order-sys-share-data","pic") + "/" + data[i].filename + "' title=\"" + data[i].path.replace("/home/nfs/order-sys-share-data","") + data[i].filename + "\"/>";
                           }else{
-                              innerhtml+="<img width=150 src='./notfound.jpg' title=\"" + data[i].path.replace("/home/nfs/order-sys-share-data","") + data[i].filename + "\" />";
+                              iconF = "other.jpg";
+                              if(ext=="ac6"){
+                                  iconF = "ac6.jpg";
+                              } else if (ext=="ai") {
+                                  iconF = "ai.jpg";
+                              } else if (ext=="cdr") {
+                                  iconF = "cdr.jpg";
+                              } else if (ext=="eps") {
+                                  iconF = "eps.jpg";
+                              } else if (ext=="ps") {
+                                  iconF = "ps.jpg";
+                              } else if (ext=="plt") {
+                                  iconF = "plt.jpg";
+                              } else if (ext=="jpg") {
+                                  iconF = "jpg.jpg";
+                              } else if (ext=="zip") {
+                                  iconF = "zip.jpg";
+                              } else if (ext=="ttf") {
+                                  iconF = "ttf.jpg";
+                              }
+                              innerhtml+="<img width=150 src='./icon/" + iconF + "' title=\"" + data[i].path.replace("/home/nfs/order-sys-share-data","") + data[i].filename + "\" />";
+                              
                           }
                           innerhtml+="</a>";
                           innerhtml+="<div style='width:150px;word-wrap:break-word;'><font size=2 color=red>" + ext + "</font><font size=2>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+data[i].filesize+"<br/>"+data[i].lastmod+"</font></div>";
@@ -72,7 +107,14 @@
                       oldkeyvalue=keyvalue;
                   }
               });
-          });
+          };
+          $(".auto").keyup(searchFunc);
+<?php
+if ($hasKeyWord){
+    echo "$(\".auto\").val('" . $searchkey . "');";
+    echo "searchFunc();";
+}
+?>
       });
   </script>
 
