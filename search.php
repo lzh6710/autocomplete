@@ -4,6 +4,7 @@ define('DB_USER', 'filesearch');
 define('DB_PASSWORD', 'filesearch123');
 define('DB_NAME', 'filesearch');
 
+date_default_timezone_set("Etc/GMT+8");
 
  function formatBytes($size) { 
   $units = array(' B', ' KB', ' MB', ' GB', ' TB'); 
@@ -19,7 +20,7 @@ if (isset($_GET['term'])){
 	    $conn = new PDO("mysql:host=".DB_SERVER.";port=8889;dbname=".DB_NAME, DB_USER, DB_PASSWORD);
 	    $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 	    
-	    $stmt = $conn->prepare('SELECT filename,path,lastmod,filesize FROM file_path WHERE filename LIKE :term order by lastmod desc limit 100');
+	    $stmt = $conn->prepare("select filename,path,date_add(lastmod,INTERVAL 16 HOUR) lastmod,filesize from (select a.filename,path,lastmod,filesize, b.max_lastmod,b.filename subfilename from (SELECT filename,path,lastmod,filesize FROM file_path WHERE filename LIKE :term limit 200) a left join (select filename,max(lastmod) max_lastmod from (SELECT SUBSTRING_INDEX(filename,'.',1) filename,lastmod FROM file_path WHERE filename LIKE :term limit 200) a group by filename) b on SUBSTRING_INDEX(a.filename,'.',1) = b.filename) c order by max_lastmod desc, subfilename");
 	    $stmt->execute(array('term' => '%'.$searchkey.'%'));
 	    
 	    while($row = $stmt->fetch()) {

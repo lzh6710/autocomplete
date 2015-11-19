@@ -13,18 +13,19 @@ if (isset($_GET['term'])){
 <head>
   <meta charset="utf-8">
   <title>Image Search</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.css" type="text/css" /> 
-  <script type="text/javascript" src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
-  <script type="text/javascript" src="http://code.jquery.com/ui/1.10.1/jquery-ui.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/masonry/3.3.2/masonry.pkgd.min.js"></script>
+  <link rel="stylesheet" href="http://apps.bdimg.com/libs/jqueryui/1.10.4/css/jquery-ui.min.css" type="text/css" /> 
+  <script type="text/javascript" src="http://apps.bdimg.com/libs/jquery/1.10.2/jquery.min.js"></script>
+  <script type="text/javascript" src="http://apps.bdimg.com/libs/jqueryui/1.10.4/jquery-ui.min.js"></script>
+  <script src="./resource/masonry.pkgd.min.js"></script>
+  <script src="resource/jquery.zclip.js"></script>
 <style type="text/css">
 .grid {
-  padding: 20px;
+  padding: 10px;
   }
 .grid-item {
-  margin-bottom: 20px;
+  margin-bottom: 10px;
   float: left;
-  width: 220px;
+  width: 160px;
   }
   .box img {
   max-width: 100%
@@ -51,18 +52,39 @@ if (isset($_GET['term'])){
                 },
                 response: function( event, ui ) {alert(ui.content.length)}
           });
+          $("#selectFilename").zclip({
+              path:"resource/ZeroClipboard.swf",
+              copy:function(){
+                  var copyall="";
+                  $("input:checked" ).each(function(i,obj) {
+                      copyall += $(obj).val() + "\r\n";
+                  });
+                  return copyall;
+              },
+              afterCopy:function(){
+                  alert("已复制");
+              }
+          });
+          var initCopyBtn = function(aid){
+              linkid = aid;
+          };
           var searchFunc = function(){
               keyvalue = $(".auto").val();
               if (oldkeyvalue==keyvalue) return;
+              $(".grid").html("");
               data={ term: keyvalue };
               $.ajax({
                   dataType: "json",
                   url: "search.php",
                   data: data,
+                  error: function(e) { 
+                      alert("服务器出错，请重新查询."); 
+                  }, 
                   success: function(data){
                       innerhtml="";
                       for(var i=0;i<data.length;i++){
                           ext = GetExtensionFileName(data[i].filename).toLowerCase();
+                          copyb = data[i].path.replace("/home/nfs/order-sys-share-data","Z:").replace(/\//g,'\\') + "\\" + data[i].filename.replace(/\//g,"\\");
                           innerhtml+="<div class='grid-item'>";
                           innerhtml+="<div>";
                           //innerhtml+="<a href='" + data[i].path.replace("/home/nfs/order-sys-share-data","file:///Z:") + "/" + data[i].filename + "' target='_new'>";
@@ -94,14 +116,15 @@ if (isset($_GET['term'])){
                               } else if (ext=="ttf") {
                                   iconF = "ttf.jpg";
                               }
-                              innerhtml+="<img width=150 src='./icon/" + iconF + "' title=\"" + data[i].path.replace("/home/nfs/order-sys-share-data","") + data[i].filename + "\" />";
+                              innerhtml+="<img width=150 src='./icon/" + iconF + "' title=\"" + data[i].path.replace("/home/nfs/order-sys-share-data","") + "/" + data[i].filename + "\" />";
                               
                           }
                           innerhtml+="</a>";
-                          innerhtml+="<div style='width:150px;word-wrap:break-word;'><font size=2 color=red>" + ext + "</font><font size=2>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+data[i].filesize+"<br/>"+data[i].lastmod+"</font></div>";
+                          innerhtml+="<div style='width:150px;word-wrap:break-word;'><input type='checkbox' id='aa" + i +  "' value='" + copyb + "'/><font size=2 color=red>" + ext + "</font><font size=2>&nbsp;&nbsp;&nbsp;&nbsp;"+data[i].filesize+"<br/>"+data[i].lastmod+"</font></div>";
                           innerhtml+="</div></div>";
                       }
                       $(".grid").html(innerhtml);
+                      initCopyBtn();
                       //console.log("result count:"+data.length);
                       //$('.grid').masonry('reload');
                       oldkeyvalue=keyvalue;
@@ -121,9 +144,7 @@ if ($hasKeyWord){
 </head>
 <body> 
 
-	<form action='' method='post'>
-		<p><label> 请输入文件名:</label><input type='text' name='country' value='' class='auto'></p>
-	</form>
+		<p><label> 请输入文件名:</label><input type='text' name='country' value='' class='auto'><button id='selectFilename'>复制文件名到剪切板</button></p>
 
 <div class="grid js-masonry"
   data-masonry-options='{ "itemSelector": ".grid-item", "columnWidth": 150 }'>
